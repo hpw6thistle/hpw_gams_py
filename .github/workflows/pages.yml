@@ -27,7 +27,9 @@ jobs:
           test -f demo/index.html
           test -f demo/assets/app.js
           test -f demo/assets/portal.css
+          test -f demo/assets/logo.png
           node --check demo/assets/app.js
+          node --check demo/assets/masters.js
           test ! -d demo/runtime
           test ! -d demo/legacy
           test ! -d demo/app

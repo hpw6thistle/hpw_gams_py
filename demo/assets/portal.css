@@ -19,6 +19,10 @@ textarea:focus-visible { outline-color: #285cb4; }
 .brand-symbol { background: #be3159; box-shadow: none; }
 .brand small { color: #5b6576; font-size: 14px; letter-spacing: 1px; }
 .brand strong { font-size: 20px; }
+.brand { flex-direction: column; align-items: center; gap: 10px; padding: 0 0 24px; }
+.company-logo { display: block; width: 205px; max-width: 100%; height: auto; object-fit: contain; background: #fff; }
+.brand-caption { color: #465267; font-size: 17px; letter-spacing: 1px; }
+.mobile-brand { display: none; }
 .nav-label { color: #596477; font-size: 14px; letter-spacing: 0; }
 .nav-item { color: #465267; font-size: 16px; min-height: 48px; padding: 12px 14px; }
 .nav-item.active { background: #fbe6ed; color: #a5254a; }
@@ -146,6 +150,38 @@ td small { color: #596477; font-size: 14px; }
 .settings-row small, .settings-row label { color: #596477; font-size: 14px; }
 .settings-row select { color: #39465c; font-size: 15px; min-height: 44px; }
 .settings-row { padding: 18px 0; }
+.settings-tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 16px 18px 0; border-bottom: 1px solid var(--border); background: #fafbfc; }
+.settings-tabs [role=tab] { min-height: 48px; font-size: 15px; color: #596477; padding: 10px 14px; background: transparent; border: 0; border-bottom: 3px solid transparent; }
+.settings-tabs [aria-selected=true] { color: #a5254a; font-weight: 700; border-bottom-color: #be3159; }
+.master-content { padding: 24px 26px; border-bottom: 1px solid #e7e9ee; }
+.master-content h2 { font-size: 21px; margin: 0 0 8px; }
+.master-content h3 { font-size: 21px; margin: 28px 0 18px; padding-left: 12px; border-left: 4px solid #4a86ff; }
+.master-content > p, .field-help { font-size: 14px; color: #596477; margin: 0; }
+.master-content .form-grid { margin-bottom: 24px; }
+.master-checkbox { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; }
+.master-add { padding: 22px 26px; }
+.master-add summary { font-size: 17px; cursor: pointer; color: #a5254a; min-height: 44px; display: list-item; }
+.master-add .form-grid { margin: 20px 0; }
+.history-form { display: flex; align-items: end; gap: 12px; margin-top: 22px; }
+.history-form .field { flex: 1; }
+.page-footer a { color: #a5254a; min-height: 44px; display: inline-flex; align-items: center; }
+.acceptance-container { max-width: 1180px; margin: auto; padding: 32px 24px; }
+.acceptance-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.acceptance-header img { width: 192px; height: auto; background: #fff; }
+.acceptance-container h1 { font-size: 30px; }
+.acceptance-container h2 { font-size: 21px; }
+.acceptance-page td { vertical-align: top; }
+.acceptance-result { min-width: 110px; }
+.acceptance-result label { display: flex; align-items: center; gap: 8px; min-height: 44px; white-space: nowrap; }
+.acceptance-notes { margin-top: 28px; }
+@media print {
+  .acceptance-container { max-width: none; padding: 0; }
+  .acceptance-header a { display: none; }
+  .acceptance-page table { font-size: 11px; }
+  .acceptance-page td, .acceptance-page th { padding: 8px; }
+  .acceptance-result label { min-height: 26px; font-size: 11px; }
+  .acceptance-page tr { break-inside: avoid; }
+}
 .settings-list > p { color: #596477 !important; font-size: 14px !important; }
 .login-panel { max-width: 650px; padding: 32px; }
 .login-panel h2 { font-size: 23px; margin: 16px 0 8px; }
@@ -179,10 +215,15 @@ dialog { width: min(780px, calc(100% - 30px)); }
   .brand strong { font-size: 18px; }
   .topbar { height: 76px; padding: 0 16px; gap: 10px; }
   .mobile-menu { color: #39465c; min-width: 44px; min-height: 44px; }
+  .mobile-brand { display: flex; align-items: center; min-width: 0; flex: 1; }
+  .mobile-brand img { display: block; width: 112px; max-width: 100%; height: auto; object-fit: contain; }
   .breadcrumbs { display: none; }
   .role-switch { padding-left: 0; border: 0; }
   .role-switch label { font-size: 13px; }
   .role-switch select { font-size: 15px; max-width: 190px; min-height: 36px; }
+  .role-switch { gap: 0; }
+  .role-switch .avatar { display: none; }
+  .role-switch select { max-width: 151px; font-size: 14px; }
   .demo-strip { padding: 10px 16px; justify-content: flex-start; font-size: 13px; flex-wrap: wrap; gap: 4px 7px; }
   .demo-strip span { flex-basis: 100%; padding-left: 25px; }
   .content { padding: 25px 16px; }
@@ -242,6 +283,15 @@ dialog { width: min(780px, calc(100% - 30px)); }
   .case-summary h2 { font-size: 18px; overflow-wrap: anywhere; }
   .settings-row { flex-wrap: wrap; }
   .settings-row select { max-width: 100%; }
+  .settings-tabs { padding: 12px 10px 0; gap: 0; }
+  .settings-tabs [role=tab] { font-size: 14px; padding: 10px; }
+  .master-content, .master-add { padding: 22px 18px; }
+  .history-form { flex-wrap: wrap; }
+  .history-form .field { flex-basis: 100%; }
+  .acceptance-container { padding: 22px 16px; }
+  .acceptance-header { flex-wrap: wrap; }
+  .acceptance-header img { width: 160px; }
+  .acceptance-page td.acceptance-result { display: grid; }
   .login-panel { padding: 25px 20px; }
   .dialog-header { padding: 16px 18px; }
   .dialog-header h2 { font-size: 19px; }
