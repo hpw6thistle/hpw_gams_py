@@ -1,0 +1,45 @@
+name: Deploy anonymous demo to GitHub Pages
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'demo/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: github-pages-demo
+  cancel-in-progress: true
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify only static demo files are published
+        run: |
+          test -f demo/index.html
+          test -f demo/assets/app.js
+          node --check demo/assets/app.js
+          test ! -d demo/runtime
+          test ! -d demo/legacy
+          test ! -d demo/app
+          if find demo -type f \( -name '*.db' -o -name '.env*' -o -name '*connection*.json' \) | grep -q .; then
+            echo 'Unexpected private or database file in demo artifact.' >&2
+            exit 1
+          fi
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Upload only the anonymous static website
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: demo
+      - name: Publish GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
