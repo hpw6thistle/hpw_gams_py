@@ -19,6 +19,8 @@
 
 首次啟用需儲存庫管理人在 Settings → Pages → Build and deployment 選擇 GitHub Actions，再於 Actions 重跑發布工作；已啟用時會自動發布。此流程不要求額外管理權杖。私人儲存庫是否可使用 Pages 取決於 GitHub 方案；不要為此直接把含其他內容的儲存庫改為公開。
 
-預定網址：https://j6xul-656-dog.github.io/hpw_/ 。工作流程成功及實際連線確認之前，不能視為已上線。
+預定網址：https://hpw6thistle.github.io/hpw_gams_py/ 。工作流程成功及實際連線確認之前，不能視為已上線。
 
 本機檢視：`python3 -m http.server 4173 --directory demo`。功能測試在原開發 checkout 執行 `.venv/bin/python scripts/test_pages_demo.py`（需先啟動本機網站、Chromium 及 pdftotext）。
+
+原選取的 j6xul-656-dog/hpw_ 經 GitHub 官方 Git 重新導向至 hpw6thistle/hpw_gams_py；網站依新儲存庫的 Pages 網址部署，沒有變更儲存庫公開／私人狀態。
