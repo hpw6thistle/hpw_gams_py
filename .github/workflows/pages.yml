@@ -26,6 +26,7 @@ jobs:
         run: |
           test -f demo/index.html
           test -f demo/assets/app.js
+          test -f demo/assets/portal.css
           node --check demo/assets/app.js
           test ! -d demo/runtime
           test ! -d demo/legacy
