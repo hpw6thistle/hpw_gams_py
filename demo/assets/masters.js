@@ -43,7 +43,7 @@ function masterFields(kind,row={},adding=false){
   const people=db.catalog.people.filter(p=>p.active||p.id===row.manager||p.id===row.person);
   const systems=db.masters.systems.filter(s=>s.active||s.id===row.systemId);
   if(kind==='systems')return masterInput('系統名稱','name',row.name)+order+masterSelect('預設管理人','manager',people,adding?'managerB':(row.manager||''),'未指定')+`<label class="master-checkbox"><input name="usesCompany" type="checkbox" ${row.usesCompany?'checked':''}>依條件顯示負責帳套</label>`+masterInput('帳套條件－所屬單位等於（留白不限）','companyUnitEquals',row.companyUnitEquals??'','text',false)+masterInput('帳套條件－部門名稱包含（留白不限）','companyDepartmentContains',row.companyDepartmentContains??'','text',false)+active;
-  if(kind==='people')return masterInput('姓名','name',row.name)+masterInput('展示登入帳號','username',row.username)+masterInput('展示 Email','email',row.email,'email',false)+order+masterInput(adding?'初始展示密碼':'重設展示密碼（留白維持原設定）','password','','password',adding)+`<p class="field-help full">密碼至少 10 碼且含英文大小寫。僅驗證格式並記錄是否設定，不儲存密碼，也不作為真實登入憑證。</p>`+active;
+  if(kind==='people')return masterInput('姓名','name',row.name)+masterInput('登入帳號','username',row.username)+masterInput('Email','email',row.email,'email',false)+order+masterInput(adding?'初始密碼':'重設密碼（留白維持原設定）','password','','password',adding)+`<p class="field-help full">密碼至少 10 碼且包含英文大小寫。</p>`+active;
   if(kind==='rules')return masterSelect('申請系統','systemId',systems,row.systemId??systems[0]?.id)+masterSelect('所屬單位條件','unitEquals',db.catalog.units.filter(x=>x.active).map(x=>({id:x.name,name:x.name})),row.unitEquals??'','不限')+masterInput('部門名稱包含（留白不限）','departmentContains',row.departmentContains,'text',false)+masterInput('角色名稱包含（留白不限）','roleContains',row.roleContains,'text',false)+masterSelect('指派管理人','person',people,row.person??people[0]?.id)+masterInput('優先序（數字越小越優先）','priority',row.priority??100,'number')+active;
   if(kind==='roles')return masterSelect('申請系統','systemId',systems,row.systemId??systems[0]?.id)+masterInput('角色／功能權限名稱','name',row.name)+order+active;
   return masterInput(kind==='units'?'所屬單位':'帳套別名稱','name',row.name)+order+active;
@@ -54,7 +54,7 @@ function masterTable(kind,rows){
   const person=id=>ROLE_NAMES[id]||'未指定';
   const enabled=r=>r.active?'啟用':'停用';
   if(kind==='systems'){headers=['排序','系統名稱','預設管理人','帳套條件','狀態'];cells=r=>[r.sort,r.name,person(r.manager),r.usesCompany?'啟用':'未啟用',`<label class="master-checkbox"><input type="checkbox" data-setting="active" data-system="${esc(r.id)}" ${r.active?'checked':''}>${enabled(r)}</label>`];}
-  else if(kind==='people'){headers=['姓名','展示登入帳號','展示 Email','密碼設定','狀態'];cells=r=>[r.name,r.username,r.email||'未設定',r.passwordSet?'已設定':'未設定',enabled(r)];}
+  else if(kind==='people'){headers=['姓名','登入帳號','Email','密碼設定','狀態'];cells=r=>[r.name,r.username,r.email||'未設定',r.passwordSet?'已設定':'未設定',enabled(r)];}
   else if(kind==='rules'){headers=['優先序','申請系統','單位／部門／角色條件','指派管理人','狀態'];cells=r=>[r.priority,system(r.systemId),[r.unitEquals||'不限',r.departmentContains||'不限',r.roleContains||'不限'].join('／'),person(r.person),enabled(r)];}
   else if(kind==='roles'){headers=['排序','申請系統','角色／功能權限','狀態'];cells=r=>[r.sort,system(r.systemId),r.name,enabled(r)];}
   else{headers=['排序',kind==='units'?'所屬單位':'帳套別','狀態'];cells=r=>[r.sort,r.name,enabled(r)];}
@@ -68,10 +68,10 @@ function renderHistory(){
   const match=historyPattern(ui.historyQuery);
   const logs=db.requests.filter(r=>match.test(r.number)).flatMap(r=>r.audit.map(a=>({...a,number:r.number}))).sort((a,b)=>b.at.localeCompare(a.at)).slice(0,500);
   const table=(rows,caseRows)=>`<div class="table-wrap"><table><thead><tr>${(caseRows?['申請單號','動作','操作者','說明','時間']:['設定動作','操作者','說明','時間']).map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(a=>`<tr>${(caseRows?[a.number,a.action,a.actor,a.detail,displayDate(a.at)]:[a.action,a.actor,a.detail,displayDate(a.at)]).map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${caseRows?5:4}" class="empty">查無符合條件的紀錄。</td></tr>`}</tbody></table></div>`;
-  return `<div class="master-content"><h2>申請歷程查詢</h2><p>僅搜尋申請編號。輸入部分編號可查包含的案件；% 為萬用字元，例如 BPM20261021%。</p><form id="history-form" class="history-form"><label class="field"><span>申請單號搜尋</span><input name="query" value="${esc(ui.historyQuery)}" maxlength="40" placeholder="完整或部分申請編號"></label><button class="btn primary" type="submit">搜尋</button>${button('清除','clear-history')}</form></div><div id="case-history">${table(logs,true)}</div><div class="master-content"><h2>設定修改紀錄</h2><p>僅記錄本瀏覽器內的展示操作；不包含展示密碼。</p></div>${table([...db.catalog.audit].reverse().slice(0,100),false)}`;
+  return `<div class="master-content"><h2>申請歷程查詢</h2><p>僅搜尋申請編號。輸入部分編號可查包含的案件；% 為萬用字元，例如 BPM20261021%。</p><form id="history-form" class="history-form"><label class="field"><span>申請單號搜尋</span><input name="query" value="${esc(ui.historyQuery)}" maxlength="40" placeholder="完整或部分申請編號"></label><button class="btn primary" type="submit">搜尋</button>${button('清除','clear-history')}</form></div><div id="case-history">${table(logs,true)}</div><div class="master-content"><h2>設定修改紀錄</h2><p>僅記錄本瀏覽器內的操作；不包含密碼。</p></div>${table([...db.catalog.audit].reverse().slice(0,100),false)}`;
 }
 function renderSettings(){
-  if(ui.role!=='super')return mainHeading('系統設定中心','僅供最高管理者調整設定。')+`<section class="panel success-panel"><h2>此角色無法修改系統設定</h2><p>可從右上角切換展示最高管理人，體驗設定功能。</p>${button('切換展示最高管理人','role-super','primary')}</section>`;
+  if(ui.role!=='super')return mainHeading('主檔與規則','僅供最高管理者調整設定。')+`<section class="panel success-panel"><h2>此角色無法修改系統設定</h2><p>可從右上角切換最高管理人，體驗設定功能。</p>${button('切換最高管理人','role-super','primary')}</section>`;
   if(!Object.hasOwn(MASTER_TABS,ui.settingsTab))ui.settingsTab='systems';
   const kind=ui.settingsTab;
   const tabs=`<div class="settings-tabs" role="tablist" aria-label="系統設定分類">${Object.entries(MASTER_TABS).map(([id,name])=>`<button id="settings-tab-${id}" role="tab" aria-selected="${id===kind}" aria-controls="settings-content" tabindex="${id===kind?0:-1}" data-action="settings-tab" data-tab="${id}">${name}</button>`).join('')}</div>`;
@@ -82,7 +82,7 @@ function renderSettings(){
     const label=r=>kind==='rules'?`${db.masters.systems.find(s=>s.id===r.systemId)?.name||'系統'} → ${ROLE_NAMES[r.person]||'未指定'}（優先序 ${r.priority}）`:kind==='roles'?`${db.masters.systems.find(s=>s.id===r.systemId)?.name||'系統'}｜${r.name}`:r.name;
     content=`<div class="master-content"><h2>${MASTER_TABS[kind]}</h2><p>上方清單供檢視；選取一筆後於下方修改。資料保留歷史，只停用，不刪除。</p></div>${masterTable(kind,rows)}${selected?`<div class="master-content"><label class="field"><span>選擇要修改的資料</span><select id="master-selection">${rows.map(r=>`<option value="${esc(r.id)}" ${r.id===selected.id?'selected':''}>${esc(label(r))}${r.active?'':'（停用）'}</option>`).join('')}</select></label><h3>修改資料</h3><form id="master-edit-form" data-kind="${kind}" data-id="${esc(selected.id)}"><div class="form-grid">${masterFields(kind,selected)}</div><button type="submit" class="btn primary">儲存修改</button></form></div>`:''}<details class="master-add"><summary>新增${MASTER_TABS[kind].replace('設定','').replace('管理','')}</summary><form id="master-add-form" data-kind="${kind}"><div class="form-grid">${masterFields(kind,{},true)}</div><button type="submit" class="btn primary">新增</button></form></details>`;
   }
-  return mainHeading('系統設定中心','管理系統、管理人、指派規則與申請歷程。')+`<div class="notice">所有變更僅存於本瀏覽器的假資料。停用或更名不會覆寫既有案件的系統、角色與已完成通知單。</div><section class="panel settings-panel">${tabs}<div id="settings-content" role="tabpanel" aria-labelledby="settings-tab-${kind}">${content}</div></section>`;
+  return mainHeading('主檔與規則','管理系統、管理人、指派規則與申請歷程。')+`<section class="panel settings-panel">${tabs}<div id="settings-content" role="tabpanel" aria-labelledby="settings-tab-${kind}">${content}</div></section>`;
 }
 function saveMasterForm(form){
   if(ui.role!=='super')return toast('僅限最高管理者修改設定。');
@@ -107,16 +107,16 @@ function saveMasterForm(form){
     }
     if(kind==='people'){
       const password=String(data.get('password')||'');row.username=get('username');row.email=get('email');
-      if(!row.username)return toast('請填寫展示登入帳號。');
-      if(rows.some(r=>r.id!==row.id&&r.username===row.username))return toast('展示登入帳號已存在。');
-      if((adding||password)&&!(password.length>=10&&/[A-Z]/.test(password)&&/[a-z]/.test(password)))return toast('展示密碼至少 10 碼，且需包含英文大小寫。');
+      if(!row.username)return toast('請填寫登入帳號。');
+      if(rows.some(r=>r.id!==row.id&&r.username===row.username))return toast('登入帳號已存在。');
+      if((adding||password)&&!(password.length>=10&&/[A-Z]/.test(password)&&/[a-z]/.test(password)))return toast('密碼至少 10 碼，且需包含英文大小寫。');
       if(password){row.passwordSet=true;row.passwordRevision=(old?.passwordRevision||0)+1;}
     }
   }
   if(old)Object.assign(old,row);else rows.push(row);
   syncDemoMasters(db);ui.masterSelection[kind]=row.id;
   recordMasterChange((adding?'新增':'修改')+MASTER_TABS[kind],kind==='rules'?`${db.masters.systems.find(s=>s.id===row.systemId)?.name} → ${ROLE_NAMES[row.person]}`:row.name);
-  save();refreshRoleOptions();render();toast(adding?'已新增展示資料。':'已儲存修改；既有案件內容保留。');
+  save();refreshRoleOptions();render();toast(adding?'已新增資料。':'已儲存修改；既有案件內容保留。');
 }
 document.addEventListener('keydown',event=>{
   const tab=event.target.closest('[data-action="settings-tab"]');if(!tab)return;
