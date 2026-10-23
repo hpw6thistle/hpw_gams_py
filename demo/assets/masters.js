@@ -10,6 +10,7 @@ function upgradeDemo(state){
     for(const key of ['units','companies'])state.catalog[key]=state.masters[key].map((name,i)=>({id:key+'-'+i,name,active:true,sort:(i+1)*10}));
   }
   state.masters.systems.forEach((s,i)=>{s.sort??=(i+1)*10;s.companyUnitEquals??='總部';s.companyDepartmentContains??='財務';});
+  alignOriginalSystems(state);
   syncDemoMasters(state);
   return state;
 }
@@ -35,7 +36,8 @@ function masterSelect(label,name,rows,value,emptyLabel){
   return `<label class="field"><span>${label}</span><select name="${name}">${emptyLabel!==undefined?`<option value="">${emptyLabel}</option>`:''}${options.map(r=>`<option value="${esc(r.id)}" ${r.id===value?'selected':''}>${esc(r.name)}</option>`).join('')}</select></label>`;
 }
 function masterInput(label,name,value,type='text',required=true){
-  return `<label class="field"><span>${label}${required?' <span class="required">*</span>':''}</span><input name="${name}" type="${type}" value="${esc(value??'')}" ${required?'required':''} ${type==='number'?'min="1" max="99999"':'maxlength="120"'} autocomplete="off"></label>`;
+  const constraints=type==='number'?'min="1" max="99999"':`maxlength="${name==='username'?30:120}" ${name==='username'?'pattern="[A-Za-z0-9][A-Za-z0-9_-]{0,29}" placeholder="請輸入管理人員工編號"':''}`;
+  return `<label class="field"><span>${label}${required?' <span class="required">*</span>':''}</span><input name="${name}" type="${type}" value="${esc(value??'')}" ${required?'required':''} ${constraints} autocomplete="off"></label>`;
 }
 function masterFields(kind,row={},adding=false){
   const order=masterInput('排序','sort',row.sort??100,'number');
@@ -43,7 +45,7 @@ function masterFields(kind,row={},adding=false){
   const people=db.catalog.people.filter(p=>p.active||p.id===row.manager||p.id===row.person);
   const systems=db.masters.systems.filter(s=>s.active||s.id===row.systemId);
   if(kind==='systems')return masterInput('系統名稱','name',row.name)+order+masterSelect('預設管理人','manager',people,adding?'managerB':(row.manager||''),'未指定')+`<label class="master-checkbox"><input name="usesCompany" type="checkbox" ${row.usesCompany?'checked':''}>依條件顯示負責帳套</label>`+masterInput('帳套條件－所屬單位等於（留白不限）','companyUnitEquals',row.companyUnitEquals??'','text',false)+masterInput('帳套條件－部門名稱包含（留白不限）','companyDepartmentContains',row.companyDepartmentContains??'','text',false)+active;
-  if(kind==='people')return masterInput('姓名','name',row.name)+masterInput('登入帳號','username',row.username)+masterInput('Email','email',row.email,'email',false)+order+masterInput(adding?'初始密碼':'重設密碼（留白維持原設定）','password','','password',adding)+`<p class="field-help full">密碼至少 10 碼且包含英文大小寫。</p>`+active;
+  if(kind==='people')return masterInput('姓名','name',row.name)+masterInput('管理人員工編號','username',row.username)+masterInput('通知 Email（非登入帳號）','email',row.email,'email',false)+order+masterInput(adding?'初始密碼':'重設密碼（留白維持原設定）','password','','password',adding)+`<p class="field-help full">密碼至少 10 碼且包含英文大小寫。</p>`+active;
   if(kind==='rules')return masterSelect('申請系統','systemId',systems,row.systemId??systems[0]?.id)+masterSelect('所屬單位條件','unitEquals',db.catalog.units.filter(x=>x.active).map(x=>({id:x.name,name:x.name})),row.unitEquals??'','不限')+masterInput('部門名稱包含（留白不限）','departmentContains',row.departmentContains,'text',false)+masterInput('角色名稱包含（留白不限）','roleContains',row.roleContains,'text',false)+masterSelect('指派管理人','person',people,row.person??people[0]?.id)+masterInput('優先序（數字越小越優先）','priority',row.priority??100,'number')+active;
   if(kind==='roles')return masterSelect('申請系統','systemId',systems,row.systemId??systems[0]?.id)+masterInput('角色／功能權限名稱','name',row.name)+order+active;
   return masterInput(kind==='units'?'所屬單位':'帳套別名稱','name',row.name)+order+active;
@@ -54,7 +56,7 @@ function masterTable(kind,rows){
   const person=id=>ROLE_NAMES[id]||'未指定';
   const enabled=r=>r.active?'啟用':'停用';
   if(kind==='systems'){headers=['排序','系統名稱','預設管理人','帳套條件','狀態'];cells=r=>[r.sort,r.name,person(r.manager),r.usesCompany?'啟用':'未啟用',`<label class="master-checkbox"><input type="checkbox" data-setting="active" data-system="${esc(r.id)}" ${r.active?'checked':''}>${enabled(r)}</label>`];}
-  else if(kind==='people'){headers=['姓名','登入帳號','Email','密碼設定','狀態'];cells=r=>[r.name,r.username,r.email||'未設定',r.passwordSet?'已設定':'未設定',enabled(r)];}
+  else if(kind==='people'){headers=['姓名','管理人員工編號','通知 Email','密碼設定','狀態'];cells=r=>[r.name,r.username,r.email||'未設定',r.passwordSet?'已設定':'未設定',enabled(r)];}
   else if(kind==='rules'){headers=['優先序','申請系統','單位／部門／角色條件','指派管理人','狀態'];cells=r=>[r.priority,system(r.systemId),[r.unitEquals||'不限',r.departmentContains||'不限',r.roleContains||'不限'].join('／'),person(r.person),enabled(r)];}
   else if(kind==='roles'){headers=['排序','申請系統','角色／功能權限','狀態'];cells=r=>[r.sort,system(r.systemId),r.name,enabled(r)];}
   else{headers=['排序',kind==='units'?'所屬單位':'帳套別','狀態'];cells=r=>[r.sort,r.name,enabled(r)];}
@@ -71,7 +73,7 @@ function renderHistory(){
   return `<div class="master-content"><h2>申請歷程查詢</h2><p>僅搜尋申請編號。輸入部分編號可查包含的案件；% 為萬用字元，例如 BPM20261021%。</p><form id="history-form" class="history-form"><label class="field"><span>申請單號搜尋</span><input name="query" value="${esc(ui.historyQuery)}" maxlength="40" placeholder="完整或部分申請編號"></label><button class="btn primary" type="submit">搜尋</button>${button('清除','clear-history')}</form></div><div id="case-history">${table(logs,true)}</div><div class="master-content"><h2>設定修改紀錄</h2><p>僅記錄本瀏覽器內的操作；不包含密碼。</p></div>${table([...db.catalog.audit].reverse().slice(0,100),false)}`;
 }
 function renderSettings(){
-  if(ui.role!=='super')return mainHeading('主檔與規則','僅供最高管理者調整設定。')+`<section class="panel success-panel"><h2>此角色無法修改系統設定</h2><p>可從右上角切換最高管理人，體驗設定功能。</p>${button('切換最高管理人','role-super','primary')}</section>`;
+  if(ui.role!=='super')return mainHeading('主檔與規則','僅供最高管理者調整設定。')+`<section class="panel success-panel"><h2>此角色無法修改系統設定</h2><p>登入後依管理權限顯示可操作的內容。</p>${isManager()?'<a class="btn primary" href="#workbench">返回案件工作台</a>':'<a class="btn primary" href="#login">管理者登入</a>'}</section>`;
   if(!Object.hasOwn(MASTER_TABS,ui.settingsTab))ui.settingsTab='systems';
   const kind=ui.settingsTab;
   const tabs=`<div class="settings-tabs" role="tablist" aria-label="系統設定分類">${Object.entries(MASTER_TABS).map(([id,name])=>`<button id="settings-tab-${id}" role="tab" aria-selected="${id===kind}" aria-controls="settings-content" tabindex="${id===kind?0:-1}" data-action="settings-tab" data-tab="${id}">${name}</button>`).join('')}</div>`;
@@ -107,7 +109,7 @@ function saveMasterForm(form){
     }
     if(kind==='people'){
       const password=String(data.get('password')||'');row.username=get('username');row.email=get('email');
-      if(!row.username)return toast('請填寫登入帳號。');
+      if(!/^[A-Za-z0-9][A-Za-z0-9_-]{0,29}$/.test(row.username))return toast('管理帳號請填寫員工編號，最多 30 字，不可使用 Email。');
       if(rows.some(r=>r.id!==row.id&&r.username===row.username))return toast('登入帳號已存在。');
       if((adding||password)&&!(password.length>=10&&/[A-Z]/.test(password)&&/[a-z]/.test(password)))return toast('密碼至少 10 碼，且需包含英文大小寫。');
       if(password){row.passwordSet=true;row.passwordRevision=(old?.passwordRevision||0)+1;}

@@ -28,9 +28,11 @@ jobs:
           test -f demo/assets/app.js
           test -f demo/assets/portal.css
           test -f demo/assets/compact.css
+          test -f demo/assets/wizard.css
           test -f demo/assets/logo.png
           node --check demo/assets/app.js
           node --check demo/assets/masters.js
+          node --check demo/assets/wizard.js
           test ! -d demo/runtime
           test ! -d demo/legacy
           test ! -d demo/app
