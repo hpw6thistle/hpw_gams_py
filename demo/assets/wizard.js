@@ -3,7 +3,7 @@
 const FORM_STEPS=['申請方式','人員資料','系統權限','確認送出'];
 const FIELD_RULES={
   employee:{max:30,placeholder:'請輸入公司員工編號',hint:'登入帳號統一使用員工編號；不可填寫信箱。',pattern:'[A-Za-z0-9][A-Za-z0-9_-]{0,29}'},
-  name:{max:40,placeholder:'請輸入中文姓名'},english:{max:60,placeholder:'請輸入英文姓名'},department:{max:60,placeholder:'例如：財務部'},
+  name:{max:40,placeholder:'請輸入中文姓名'},english:{max:60,placeholder:'請輸入英文姓名（選填）'},department:{max:60,placeholder:'例如：財務部'},
   reason:{max:300,placeholder:'請說明協助申請的原因'},description:{max:600,placeholder:'請補充實際工作用途或其他權限需求（選填）'}
 };
 const SYSTEM_REFERENCE={
@@ -28,16 +28,16 @@ function alignOriginalSystems(state){
 function freshForm(){return {mode:'自行申請',employee:'',name:'',english:'',unit:'',department:'',ben_employee:'',ben_name:'',ben_english:'',ben_unit:'',ben_department:'',reason:'',type:'新增帳號',existing:'',description:'',systems:[],roles:{},companies:[]};}
 function inputField(label,name,value,type='text',required=true,full=false,readonly=false){
   const key=name.startsWith('ben_')?name.slice(4):name,rule=FIELD_RULES[key]||{max:120,placeholder:'請輸入'+label};
-  return `<label class="field ${full?'full':''}"><span>${esc(label)}${required?' <span class="required">*</span>':''}</span><input name="${name}" type="${type}" value="${esc(value)}" maxlength="${rule.max}" ${rule.pattern?`pattern="${rule.pattern}"`:''} placeholder="${esc(rule.placeholder)}" ${required?'required':''} ${readonly?'readonly':''} autocomplete="off" aria-describedby="hint-${name}"><span class="field-meta" id="hint-${name}"><span>${esc(rule.hint||'')}</span><span data-counter="${name}">${String(value||'').length}/${rule.max}</span></span></label>`;
+  return `<label class="field ${full?'full':''}"><span>${esc(label)}${required?' <span class="required">*</span>':key==='english'?' <span class="optional-label">選填</span>':''}</span><input name="${name}" type="${type}" value="${esc(value)}" maxlength="${rule.max}" ${rule.pattern?`pattern="${rule.pattern}"`:''} placeholder="${esc(rule.placeholder)}" ${required?'required':''} ${readonly?'readonly':''} autocomplete="off" aria-describedby="hint-${name}"><span class="field-meta" id="hint-${name}"><span>${esc(rule.hint||'')}</span><span data-counter="${name}">${String(value||'').length}/${rule.max}</span></span></label>`;
 }
 function longField(label,name,value,required=false){const r=FIELD_RULES[name];return `<label class="field full"><span>${label}${required?' <span class="required">*</span>':''}</span><textarea name="${name}" maxlength="${r.max}" placeholder="${esc(r.placeholder)}" ${required?'required':''}>${esc(value)}</textarea><span class="field-meta"><span></span><span data-counter="${name}">${String(value||'').length}/${r.max}</span></span></label>`;}
-function wizardSteps(){return `<ol class="process-steps wizard-steps" aria-label="填寫進度">${FORM_STEPS.map((label,i)=>{const id='help-'+(++help.count);return `<li class="${i===ui.wizardStep?'current':i<ui.wizardStep?'done':''}" ${i===ui.wizardStep?'aria-current="step"':''}><span class="help-wrap step-help"><button type="button" class="help-trigger step-info" data-action="help" aria-label="${label}：申請流程說明" aria-describedby="${id}" aria-expanded="false"><span class="process-number">${i<ui.wizardStep?icon('check'):i+1}</span><span>${label}</span></button><span class="help-tooltip process-tooltip" role="tooltip" id="${id}"><strong>申請流程</strong><span><b>填寫申請資料</b>選擇申請方式、系統與所需角色。</span><span><b>管理人分工處理</b>依權限使用人的部門與規則指派。</span><span><b>完成帳號與權限設定</b>處理完成後，可在進度頁查看結果。</span></span></span>${i<3?`<span class="process-arrow" aria-hidden="true">${icon('arrow')}</span>`:''}</li>`;}).join('')}</ol>`;}
+function wizardSteps(){return `<ol class="process-steps wizard-steps" aria-label="填寫進度">${FORM_STEPS.map((label,i)=>`<li class="${i===ui.wizardStep?'current':i<ui.wizardStep?'done':''}" ${i===ui.wizardStep?'aria-current="step"':''}><span class="process-number">${i<ui.wizardStep?icon('check'):i+1}</span><span>${label}</span>${i<3?`<span class="process-arrow" aria-hidden="true">${icon('arrow')}</span>`:''}</li>`).join('')}</ol>`;}
 function renderHome(){return mainHeading('系統帳號與權限','請依需求選擇入口。')+`<section class="home-services" aria-label="服務入口">${[
   ['apply','plus','提出申請','申請新帳號或調整既有權限'],['overview','grid','我的申請','查看申請、補件提醒與處理結果'],['lookup','search','進度查詢','用申請編號及員工編號查詢'],[isManager()?'workbench':'login','briefcase',isManager()?'案件工作台':'管理者登入',isManager()?'處理分派給您的申請':'進入管理人的案件處理入口']
 ].map(([view,i,title,description])=>`<a class="home-service" href="#${view}" ${view==='apply'?'data-action="new"':''}><span class="home-service-icon">${icon(i)}</span><div><h2>${title}</h2><p>${description}</p></div>${icon('arrow')}</a>`).join('')}</section><section class="panel home-notices"><div class="panel-head"><h2>待辦提醒</h2></div><div class="home-notice-body">${visibleRequests().some(r=>overall(r.tasks)==='退回補件')?`<p>有 ${visibleRequests().filter(r=>overall(r.tasks)==='退回補件').length} 件申請需要補充資料。</p>${button('前往我的申請','home-requests','primary')}`:'<p>目前沒有需要補充資料的申請。</p>'}</div></section>`;}
 function wizardBody(d,original){
-  if(ui.wizardStep===0)return `<h2>申請方式</h2><p class="section-intro">先選擇權限給誰使用，以及要申請的服務。</p><fieldset class="choice-field"><legend>這份權限給誰使用？ <span class="required">*</span></legend><div class="radio-group choice-options">${[['自行申請','我自己','申請本人工作所需權限'],['代為申請','其他同仁','協助同仁提出申請']].map(([v,t,p])=>`<label><input type="radio" name="mode" value="${v}" ${d.mode===v?'checked':''} ${original?'disabled':''}><span><strong>${t}</strong><small>${p}</small></span></label>`).join('')}</div></fieldset><fieldset class="choice-field"><legend>需要哪一種服務？ <span class="required">*</span></legend><div class="radio-group choice-options">${[['新增帳號','新增帳號','尚未開通要申請的系統'],['已有帳號新增功能','調整既有權限','已有帳號，需要增加功能']].map(([v,t,p])=>`<label><input type="radio" name="type" value="${v}" ${d.type===v?'checked':''} ${original?'disabled':''}><span><strong>${t}</strong><small>${p}</small></span></label>`).join('')}</div></fieldset>${d.type==='已有帳號新增功能'?`<div class="account-definition"><strong>既有帳號＝權限使用人的員工編號</strong><p>下一步填寫員工編號後自動帶入，不使用 Email 或手機號碼作為登入帳號。</p></div>`:''}`;
-  if(ui.wizardStep===1)return `<h2>人員資料</h2><p class="section-intro">標示 <span class="required">*</span> 為必填。員工編號同時作為登入帳號。</p><div class="form-grid">${inputField('申請人員工編號','employee',d.employee,'text',true,true,Boolean(original))}${inputField('申請人中文姓名','name',d.name)}${inputField('申請人英文姓名','english',d.english)}${unitField('所屬單位','unit',d.unit)}${inputField('部門名稱','department',d.department)}</div>${d.mode==='代為申請'?`<h3>權限使用人</h3><p class="section-intro">填寫實際使用這些系統的同仁資料。</p><div class="form-grid">${inputField('權限使用人員工編號','ben_employee',d.ben_employee,'text',true,true)}${inputField('權限使用人中文姓名','ben_name',d.ben_name)}${inputField('權限使用人英文姓名','ben_english',d.ben_english)}${unitField('權限使用人單位','ben_unit',d.ben_unit)}${inputField('權限使用人部門','ben_department',d.ben_department)}${longField('代為申請原因','reason',d.reason,true)}</div>`:''}`;
+  if(ui.wizardStep===0)return `<h2>申請方式</h2><p class="section-intro">先選擇權限給誰使用，以及要申請的服務。</p><div class="choice-layout"><fieldset class="choice-field"><legend>這份權限給誰使用？ <span class="required">*</span></legend><div class="radio-group choice-options">${[['自行申請','我自己','申請本人工作所需權限','user'],['代為申請','其他同仁','協助同仁提出申請','briefcase']].map(([v,t,p,i])=>`<label><input type="radio" name="mode" value="${v}" ${d.mode===v?'checked':''} ${original?'disabled':''}><span class="choice-symbol">${icon(i)}</span><span class="choice-copy"><strong>${t}</strong><small>${p}</small></span></label>`).join('')}</div></fieldset><fieldset class="choice-field"><legend>需要哪一種服務？ <span class="required">*</span></legend><div class="radio-group choice-options">${[['新增帳號','新增帳號','尚未開通要申請的系統','plus'],['已有帳號新增功能','調整既有權限','已有帳號，需要增加功能','settings']].map(([v,t,p,i])=>`<label><input type="radio" name="type" value="${v}" ${d.type===v?'checked':''} ${original?'disabled':''}><span class="choice-symbol">${icon(i)}</span><span class="choice-copy"><strong>${t}</strong><small>${p}</small></span></label>`).join('')}</div></fieldset></div>${d.type==='已有帳號新增功能'?`<div class="account-definition"><strong>既有帳號＝權限使用人的員工編號</strong><p>下一步填寫員工編號後自動帶入，不使用 Email 或手機號碼作為登入帳號。</p></div>`:''}`;
+  if(ui.wizardStep===1)return `<h2>人員資料</h2><p class="section-intro">標示 <span class="required">*</span> 為必填。員工編號同時作為登入帳號。</p><div class="form-grid">${inputField('申請人員工編號','employee',d.employee,'text',true,true,Boolean(original))}${inputField('申請人中文姓名','name',d.name)}${inputField('申請人英文姓名','english',d.english,'text',false)}${unitField('所屬單位','unit',d.unit)}${inputField('部門名稱','department',d.department)}</div>${d.mode==='代為申請'?`<h3>權限使用人</h3><p class="section-intro">填寫實際使用這些系統的同仁資料。</p><div class="form-grid">${inputField('權限使用人員工編號','ben_employee',d.ben_employee,'text',true,true)}${inputField('權限使用人中文姓名','ben_name',d.ben_name)}${inputField('權限使用人英文姓名','ben_english',d.ben_english,'text',false)}${unitField('權限使用人單位','ben_unit',d.ben_unit)}${inputField('權限使用人部門','ben_department',d.ben_department)}${longField('代為申請原因','reason',d.reason,true)}</div>`:''}`;
   if(ui.wizardStep===2){
     const systems=original?original.tasks.map(t=>db.masters.systems.find(s=>s.id===t.systemId)).filter(Boolean):db.masters.systems.filter(s=>s.active);
     return `<h2>系統與權限</h2><p class="selection-hint">${icon('info')}系統、角色與負責帳套皆可複選；請依實際工作需求勾選。</p><div id="system-choices">${systems.map(system=>{
@@ -51,7 +51,7 @@ function wizardBody(d,original){
 function renderWizard(){
   if(ui.success)return mainHeading('申請已送出','請保留申請編號。')+`<section class="panel success-panel"><div class="success-mark">${icon('check')}</div><h2>申請已成功送出</h2><div class="request-number"><code>${ui.success}</code>${button(`${icon('copy')}複製`,'copy','small',`data-value="${ui.success}"`)}</div><p>查詢員工編號：${esc(findRequest(ui.success).applicant.employee)}</p><div class="success-actions">${button('查看申請進度','lookup-success','primary')}${button('再建立一筆','new')}</div></section>`;
   ui.draft??=freshForm();ui.wizardStep??=0;const d=ui.draft,original=ui.editing?findRequest(ui.editing):null;
-  return mainHeading(original?'補件／修改申請':'資訊系統帳號權限申請','依步驟填寫，最後確認後送出。')+wizardSteps()+`<div class="form-layout"><form id="application-form" class="panel wizard-panel" data-step="${ui.wizardStep}" novalidate><div class="wizard-section"><div class="wizard-kicker">步驟 ${ui.wizardStep+1}／4</div><div id="form-error" class="error-summary" role="alert" tabindex="-1" hidden></div>${wizardBody(d,original)}</div><div class="form-submit wizard-actions">${ui.wizardStep>0?button('上一步','wizard-back'):button('返回首頁','go-home','text')}<button type="submit" class="btn primary">${ui.wizardStep===3?(original?'重新送出補件':'送出申請'):'下一步'} ${icon('arrow')}</button></div></form><aside class="side-stack application-aside"><section class="panel summary-card"><div class="panel-head"><h2>本次申請摘要</h2>${help('確認權限使用人、申請類型與所選系統。','申請摘要說明')}</div><div id="draft-summary" class="draft-summary"></div></section></aside></div>`;
+  return mainHeading(original?'補件／修改申請':'資訊系統帳號權限申請','依步驟填寫，最後確認後送出。')+wizardSteps()+`<div class="form-layout"><form id="application-form" class="panel wizard-panel" data-step="${ui.wizardStep}" novalidate><div class="wizard-section"><div class="wizard-kicker">步驟 ${ui.wizardStep+1}／4</div><div id="form-error" class="error-summary" role="alert" tabindex="-1" hidden></div>${wizardBody(d,original)}</div><div class="form-submit wizard-actions">${ui.wizardStep>0?button('上一步','wizard-back'):button('返回首頁','go-home','text')}<button type="submit" class="btn primary">${ui.wizardStep===3?(original?'重新送出補件':'送出申請'):'下一步'} ${icon('arrow')}</button></div></form></div>`;
 }
 function readWizardDraft(form){
   const data=new FormData(form),d={...ui.draft,systems:[...(ui.draft?.systems||[])],roles:{...(ui.draft?.roles||{})},companies:[...(ui.draft?.companies||[])]};
@@ -85,43 +85,10 @@ function renderBreadcrumbs(){
   else{el.textContent='';el.parentElement.hidden=true;}
 }
 
-/* Presentation only: preserve text, control names, values and business state. */
-let formPresentationSections=[];
-let formPresentationFrame=0;
-function setFormSectionFocus(index){
-  formPresentationSections.forEach((section,i)=>{section.dataset.focusState=i===index?'active':i>index?'upcoming':'previous';});
-}
-function refreshFormSectionFocus(){
-  formPresentationFrame=0;
-  if(!formPresentationSections.length)return;
-  const readingLine=Math.min(220,window.innerHeight*.3);
-  let index=formPresentationSections.findIndex(section=>section.getBoundingClientRect().bottom>readingLine);
-  if(index<0)index=formPresentationSections.length-1;
-  setFormSectionFocus(index);
-}
-function queueFormSectionFocus(){
-  if(!formPresentationFrame)formPresentationFrame=requestAnimationFrame(refreshFormSectionFocus);
-}
+/* Presentation groups support mobile scroll positioning without dimming controls. */
 function initFormPresentation(){
   const form=document.getElementById('application-form');
   document.documentElement.classList.toggle('form-scrolling',Boolean(form));
-  formPresentationSections=[];
   if(!form)return;
-  const step=Number(form.dataset.step);
-  const selector=step===0?'.choice-field':step===1?'.wizard-section>.form-grid':step===2?'.system-card,.company-section,.wizard-description':'.review-grid,.review-systems,.review-confirm';
-  formPresentationSections=[...form.querySelectorAll(selector)].map(section=>{
-    if(section.matches('.system-card,.review-confirm')){
-      const space=document.createElement('div');
-      section.before(space);space.append(section);section=space;
-    }
-    section.classList.add('focus-section');return section;
-  });
-  form.addEventListener('focusin',event=>{
-    const section=event.target.closest('.focus-section');
-    const index=formPresentationSections.indexOf(section);
-    if(index>=0)setFormSectionFocus(index);
-  });
-  refreshFormSectionFocus();
+  form.querySelectorAll('.choice-field,.form-grid,.system-card,.company-section,.wizard-description,.review-grid,.review-systems,.review-confirm').forEach(section=>section.classList.add('focus-section'));
 }
-window.addEventListener('scroll',queueFormSectionFocus,{passive:true});
-window.addEventListener('resize',queueFormSectionFocus,{passive:true});
