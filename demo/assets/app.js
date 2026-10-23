@@ -131,6 +131,7 @@ function render(){
   labelTables();
   updateDraftSummary();
   cleanInterface();
+  initFormPresentation();
 }
 function go(view){if(!['home','overview','apply','lookup','login','workbench','settings'].includes(view))view='home';ui.view=view;ui.query='';ui.page=1;document.getElementById('quick-search').value='';if(location.hash!==`#${view}`)history.pushState(null,'',`#${view}`);closeMenu();render();window.scrollTo({top:0,behavior:'instant'});}
 function guide(){return `<section class="panel flow-card"><div class="panel-head"><h2>申請流程</h2>${help('從提出需求到完成設定，集中追蹤帳號與權限申請。','申請流程說明')}</div><div class="guide-list">${[['document','填寫申請資料','選擇申請方式、系統與所需角色。'],['briefcase','管理人分工處理','依權限使用人的部門與規則指派。'],['check','完成帳號與權限設定','處理完成後，可在進度頁查看結果。']].map(([i,t,p])=>`<div class="guide-item"><span class="step-icon">${icon(i)}</span><div><strong>${t}</strong><p>${p}</p></div></div>`).join('')}</div></section>`;}

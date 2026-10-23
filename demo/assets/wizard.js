@@ -84,3 +84,44 @@ function renderBreadcrumbs(){
   if(ui.view==='settings'&&ui.role==='super'){el.innerHTML=`<a href="#settings">主檔與規則</a><span aria-hidden="true">／</span><span aria-current="page">${MASTER_TABS[ui.settingsTab]||MASTER_TABS.systems}</span>`;el.parentElement.hidden=false;}
   else{el.textContent='';el.parentElement.hidden=true;}
 }
+
+/* Presentation only: preserve text, control names, values and business state. */
+let formPresentationSections=[];
+let formPresentationFrame=0;
+function setFormSectionFocus(index){
+  formPresentationSections.forEach((section,i)=>{section.dataset.focusState=i===index?'active':i>index?'upcoming':'previous';});
+}
+function refreshFormSectionFocus(){
+  formPresentationFrame=0;
+  if(!formPresentationSections.length)return;
+  const readingLine=Math.min(220,window.innerHeight*.3);
+  let index=formPresentationSections.findIndex(section=>section.getBoundingClientRect().bottom>readingLine);
+  if(index<0)index=formPresentationSections.length-1;
+  setFormSectionFocus(index);
+}
+function queueFormSectionFocus(){
+  if(!formPresentationFrame)formPresentationFrame=requestAnimationFrame(refreshFormSectionFocus);
+}
+function initFormPresentation(){
+  const form=document.getElementById('application-form');
+  document.documentElement.classList.toggle('form-scrolling',Boolean(form));
+  formPresentationSections=[];
+  if(!form)return;
+  const step=Number(form.dataset.step);
+  const selector=step===0?'.choice-field':step===1?'.wizard-section>.form-grid':step===2?'.system-card,.company-section,.wizard-description':'.review-grid,.review-systems,.review-confirm';
+  formPresentationSections=[...form.querySelectorAll(selector)].map(section=>{
+    if(section.matches('.system-card,.review-confirm')){
+      const space=document.createElement('div');
+      section.before(space);space.append(section);section=space;
+    }
+    section.classList.add('focus-section');return section;
+  });
+  form.addEventListener('focusin',event=>{
+    const section=event.target.closest('.focus-section');
+    const index=formPresentationSections.indexOf(section);
+    if(index>=0)setFormSectionFocus(index);
+  });
+  refreshFormSectionFocus();
+}
+window.addEventListener('scroll',queueFormSectionFocus,{passive:true});
+window.addEventListener('resize',queueFormSectionFocus,{passive:true});
