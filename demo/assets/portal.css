@@ -20,7 +20,7 @@ textarea:focus-visible { outline-color: #285cb4; }
 .brand small { color: #5b6576; font-size: 14px; letter-spacing: 1px; }
 .brand strong { font-size: 20px; }
 .brand { flex-direction: column; align-items: center; gap: 10px; padding: 0 0 24px; }
-.company-logo { display: block; width: 205px; max-width: 100%; height: auto; object-fit: contain; background: #fff; }
+.company-logo { display: block; width: 205px; max-width: 100%; height: auto; object-fit: contain; background: transparent; }
 .brand-caption { color: #465267; font-size: 17px; letter-spacing: 1px; }
 .mobile-brand { display: none; }
 .nav-label { color: #596477; font-size: 14px; letter-spacing: 0; }
