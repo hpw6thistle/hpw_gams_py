@@ -1,0 +1,167 @@
+/* Application-first: larger typography, red chapter accents and a two-by-two grid. */
+:root { --accent:#b31f36; --blue:var(--accent); --ink:#30252a; --muted:#76626b; }
+body { font-size:18px; line-height:1.7; }
+.sidebar { padding-top:32px; }
+.brand-caption { font-size:16px; }
+.nav-item { font-size:17px; min-height:50px; gap:12px; }
+.nav-item svg { width:21px; height:21px; }
+.nav-label { font-size:15px; }
+.reset-link { font-size:15px; }
+.version { font-size:13px; }
+.menu-label { font-size:15px; }
+.mobile-menu { height:46px; }
+.breadcrumbs,.topbar-search input,.role-switch select { font-size:16px; }
+.role-switch label { font-size:13px; }
+.page-heading h1 { font-size:30px; line-height:1.5; }
+.content { padding-top:34px; }
+.btn,.chip-button { font-size:16px; min-height:46px; padding:10px 16px; }
+.btn.small { font-size:15px; min-height:40px; }
+.help-trigger { width:30px; height:30px; }
+.help-trigger svg { width:18px; height:18px; }
+.help-tooltip { font-size:15px; line-height:1.7; width:280px; }
+.home-service h2 { font-size:22px; }
+.home-service p,.home-notice-body p { font-size:16px; }
+.panel-head h2 { font-size:20px; }
+.panel-head p,.notice,.field-help { font-size:15px; }
+.form-layout { max-width:940px; }
+.wizard-steps { width:min(100%,700px); max-width:700px; margin:0 auto 30px; }
+.wizard-steps li { font-size:15px; gap:9px; }
+.wizard-steps .process-number { width:29px; height:29px; font-size:14px; }
+.wizard-steps .process-arrow { right:2px; }
+.wizard-panel { background:#fff; border:1px solid #ecdde2; border-radius:16px; box-shadow:0 16px 50px #79233907; }
+.wizard-section { padding:30px 32px 32px; }
+.wizard-kicker { display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:650; letter-spacing:1px; margin-bottom:16px; }
+.wizard-kicker::before { content:""; width:24px; height:3px; background:var(--accent); }
+.wizard-section h2 { font-size:32px; font-weight:750; margin-bottom:14px; }
+.wizard-section h3 { font-size:22px; }
+.section-intro,.selection-hint { font-size:17px; line-height:1.8; }
+.application-entry .page-heading { max-width:820px; margin-inline:auto; }
+.application-entry .page-heading h1 { font-size:26px; color:#63515a; }
+.application-entry .form-layout { max-width:820px; }
+.application-entry .wizard-panel { position:relative; border-color:#e7c8d2; box-shadow:0 20px 60px #8d23370b; }
+.application-entry .wizard-panel::before { content:""; position:absolute; top:-1px; left:28px; width:84px; height:4px; background:var(--accent); border-radius:0 0 3px 3px; }
+.application-entry .wizard-section h2 { font-size:42px; font-weight:800; color:var(--accent); letter-spacing:1px; line-height:1.35; }
+.application-entry .section-intro { color:#7b6470; margin-bottom:28px; }
+.choice-layout { display:grid; grid-template-columns:1fr; max-width:none; gap:34px; margin-top:30px; }
+.choice-field,.choice-field+.choice-field { margin:0; }
+.choice-field legend { display:flex; align-items:center; gap:10px; font-size:19px; font-weight:650; line-height:1.6; margin-bottom:18px; }
+.question-number { display:inline-grid; place-items:center; width:29px; height:29px; flex-shrink:0; border-radius:6px; color:var(--accent); background:#fce7ed; font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; }
+.choice-options { grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+.choice-options label { min-height:182px; padding:24px; border:1px solid #e6d7dd; border-radius:10px; gap:18px; }
+.choice-options label:has(input:checked) { background:#fff1f5; border-color:#d96c82; box-shadow:0 6px 20px #b3263808; }
+.choice-symbol { width:44px; height:44px; border-radius:10px; background:#fff7fa; }
+.choice-symbol svg { width:25px; height:25px; }
+.choice-options strong { font-size:23px; line-height:1.5; font-weight:700; }
+.choice-options small { color:#795e6c; font-size:16px; line-height:1.65; margin-top:5px; }
+.choice-options input { width:21px; height:21px; top:23px; right:22px; }
+.choice-options input::before { width:11px; height:11px; background:#b92340; }
+.account-definition { padding:18px 20px; font-size:16px; }
+.account-definition p { font-size:15px; line-height:1.8; }
+.field { font-size:18px; gap:10px; }
+.field input,.field select,.field textarea,.lookup-input,
+.wizard-panel .field input,.wizard-panel .field select,.wizard-panel .field textarea { font-size:18px; min-height:52px; padding:12px 14px; }
+.wizard-panel .field input::placeholder,.wizard-panel .field textarea::placeholder { font-size:16px; }
+.field-meta { font-size:14px; color:#8b737d; line-height:1.6; }
+.optional-label { font-size:14px; }
+.form-grid { gap:26px 24px; }
+.wizard-actions { padding:22px 32px; background:#fff8fa; border-color:#f0dfe5; border-radius:0 0 16px 16px; }
+.wizard-actions>.btn,.wizard-actions>.btn:last-child { min-height:50px; width:152px; min-width:152px; font-size:17px; }
+.system-name { font-size:19px; }
+.system-choice .system-copy small { font-size:15px; }
+.system-code { font-size:13px; }
+.role-heading,.role-heading>span,.selection-count { font-size:15px; }
+.role-options label,.company-options label { font-size:17px; min-height:44px; }
+input[type=checkbox] { width:19px; height:19px; }
+.review-grid dt { font-size:16px; }
+.review-grid dd,.review-systems strong { font-size:18px; }
+.review-systems p,.review-description { font-size:16px; }
+.review-confirm { font-size:17px; }
+.focus-section { opacity:1; transition:opacity 260ms ease; }
+.focus-section[data-focus-state=upcoming] { opacity:.55; }
+.focus-section:focus-within,.focus-section:hover { opacity:1; }
+.focus-section[data-focus-state=active] { opacity:1; }
+.filter,.manager-tabs button,.settings-tabs [role=tab] { font-size:16px; }
+table,td,td strong,.request-link { font-size:16px; }
+th,td small,.table-footer,.badge,.system-tag { font-size:14px; }
+.lookup-panel h2,.case-summary h2,.master-content h2,.master-content h3 { font-size:23px; }
+.lookup-panel>p,.master-content>p,.master-checkbox,.detail-grid dd { font-size:17px; }
+.detail-grid dt { font-size:15px; }
+.master-add summary { font-size:18px; }
+.stat-top,.stat-caption,.stat-bottom small { font-size:15px; }
+.stat-number { font-size:34px; }
+.login-panel h2 { font-size:27px; }
+.login-panel>p,.demo-roles .btn { font-size:17px; }
+.page-footer { font-size:13px; }
+@media(min-width:761px) {
+  .sidebar-collapsed .nav-item>span { font-size:14px; }
+  .sidebar-collapsed .nav-item { min-height:78px; }
+  .sidebar-collapsed .reset-link { font-size:13px; }
+}
+@media(min-width:761px) and (max-width:1100px) {
+  .sidebar { padding-inline:12px; }
+  .sidebar .nav-item { font-size:16px; padding-inline:8px; gap:8px; }
+  .sidebar .nav-item svg { width:18px; height:18px; }
+  .brand-caption { font-size:14px; }
+  .topbar { padding-inline:16px; gap:10px; }
+  .topbar-search { display:none; }
+  .role-switch select { max-width:130px; }
+  .wizard-section { padding:28px 24px; }
+  .choice-options label { padding:22px 18px; }
+  .choice-options strong { font-size:21px; }
+  .choice-options small { font-size:15px; }
+}
+@media(max-width:760px) {
+  body { font-size:17px; }
+  .content { padding:24px 14px; }
+  .menu-label { font-size:14px; }
+  .mobile-menu { padding-inline:8px; min-height:46px; }
+  .mobile-brand img { width:80px; }
+  .admin-login-shortcut { font-size:14px; padding-inline:8px; }
+  .logout-button { font-size:16px; }
+  .page-heading h1,.application-entry .page-heading h1 { font-size:22px; line-height:1.6; }
+  .wizard-steps { margin-bottom:24px; }
+  .wizard-steps li { flex-direction:column; justify-content:flex-start; padding:4px 1px; gap:7px; font-size:12px; line-height:1.5; text-align:center; }
+  .wizard-steps .process-number { width:27px; height:27px; font-size:13px; }
+  .wizard-steps .process-arrow { top:17px; right:-5px; }
+  .wizard-steps .process-arrow svg { width:13px; }
+  .wizard-panel { border-radius:12px; }
+  .wizard-section { padding:26px 18px; }
+  .wizard-kicker { font-size:14px; }
+  .wizard-section h2 { font-size:29px; }
+  .application-entry .wizard-section h2 { font-size:36px; }
+  .section-intro,.selection-hint { font-size:16px; }
+  .choice-layout { gap:30px; margin-top:26px; }
+  .choice-field legend { gap:7px; font-size:17px; margin-bottom:16px; }
+  .question-number { width:25px; height:25px; font-size:12px; }
+  .choice-options { gap:12px; }
+  .choice-options label { min-height:190px; padding:18px 12px; gap:16px; }
+  .choice-options strong { font-size:20px; }
+  .choice-options small { font-size:14px; }
+  .choice-symbol { width:36px; height:36px; }
+  .choice-symbol svg { width:22px; height:22px; }
+  .choice-options input { top:18px; right:11px; width:20px; height:20px; }
+  .choice-options input::before { width:10px; height:10px; }
+  .field { font-size:17px; }
+  .wizard-panel .field input,.wizard-panel .field select,.wizard-panel .field textarea { font-size:18px; }
+  .wizard-panel .field input::placeholder,.wizard-panel .field textarea::placeholder { font-size:16px; }
+  .field-meta { font-size:14px; }
+  .focus-section { padding-block:0 16px; }
+  .choice-field.focus-section { padding-block:0; }
+  .wizard-actions { padding:20px 18px; gap:12px; border-radius:0 0 12px 12px; }
+  .wizard-actions>.btn,.wizard-actions>.btn:last-child { width:calc((100% - 12px)/2); min-width:0; font-size:16px; min-height:50px; padding-inline:8px; }
+  .account-definition { font-size:15px; padding:16px; }
+  .account-definition p { font-size:14px; }
+  .role-options label { font-size:16px; }
+  .system-name { font-size:18px; }
+  .system-choice .system-copy small { font-size:14px; }
+  .review-grid dd { font-size:18px; }
+  .review-confirm { font-size:16px; }
+  .home-service p,.home-notice-body p { font-size:16px; }
+  .page-footer { font-size:13px; }
+}
+@media(prefers-reduced-motion:reduce) { .focus-section { transition:none; } }
+@media print { .focus-section[data-focus-state=upcoming] { opacity:1; } }
+/* Anchor heading explanations inside the content column at every text size. */
+.page-heading { position:relative; }
+.page-heading .heading-title .help-wrap { position:static; }
+.page-heading .heading-title .help-tooltip { left:0; right:auto; top:calc(100% + 8px); }

@@ -110,7 +110,7 @@ function cleanInterface(doc=document){
 function button(text,action,classes='',extra=''){return `<button class="btn ${classes}" data-action="${action}" ${extra}>${text}</button>`;}
 function shell(){
   const nav=(view,label,i,extra='')=>`<a class="nav-item" data-view="${view}" href="#${view}" ${extra}>${icon(i)}<span>${label}</span></a>`;
-  document.getElementById('app').innerHTML=`<div class="menu-backdrop" data-action="close-menu"></div><aside id="primary-sidebar" class="sidebar"><a href="#home" class="brand" aria-label="海霸王・回到首頁" title="回到首頁"><img class="company-logo" src="./assets/logo.png" alt="海霸王" width="192" height="74"><span class="brand-caption">系統帳號申請</span></a><nav aria-label="主要導覽">${nav('apply','提出申請','plus','data-action="new"')}${nav('overview','我的申請','grid')}${nav('lookup','進度查詢','search')}<div class="nav-label" data-manager-only>管理功能</div>${nav('workbench','案件工作台','briefcase','data-manager-only')}${nav('settings','主檔與規則','settings','data-super-only')}</nav><div class="sidebar-bottom"><button class="reset-link" data-action="reset">${icon('return')}重設資料</button><div class="version">v19</div></div></aside><div class="shell"><header class="topbar"><button class="mobile-menu" aria-controls="primary-sidebar" aria-label="開啟選單" aria-expanded="false" data-action="menu">${icon('menu')}<span class="menu-label">選單</span></button><a href="#home" class="mobile-brand" aria-label="海霸王・回到首頁" title="回到首頁"><img src="./assets/logo.png" alt="海霸王" width="192" height="74"></a><div class="breadcrumbs"><span id="breadcrumb-current">提出申請</span></div><div class="topbar-search">${icon('search')}<input id="quick-search" type="search" aria-label="搜尋申請" placeholder="搜尋申請編號或姓名"></div><a class="admin-login-shortcut btn text" href="#login" data-applicant-only>管理者登入</a><div class="role-switch" data-manager-only><span class="avatar" id="role-avatar">甲</span><div><label for="role-select">目前角色</label><select id="role-select">${Object.entries(availableRoles()).map(([key,name])=>`<option value="${esc(key)}">${esc(name)}</option>`).join('')}</select></div></div><button class="btn text logout-button" data-action="logout" data-manager-only>登出</button></header><main id="main" class="content" tabindex="-1"></main></div>`;
+  document.getElementById('app').innerHTML=`<div class="menu-backdrop" data-action="close-menu"></div><aside id="primary-sidebar" class="sidebar"><a href="#apply" data-action="go-home" class="brand" aria-label="海霸王・回到首頁" title="回到首頁"><img class="company-logo" src="./assets/logo.png" alt="海霸王" width="192" height="74"><span class="brand-caption">系統帳號申請</span></a><nav aria-label="主要導覽">${nav('apply','提出申請','plus','data-action="new"')}${nav('overview','我的申請','grid')}${nav('lookup','進度查詢','search')}<div class="nav-label" data-manager-only>管理功能</div>${nav('workbench','案件工作台','briefcase','data-manager-only')}${nav('settings','主檔與規則','settings','data-super-only')}</nav><div class="sidebar-bottom"><button class="reset-link" data-action="reset">${icon('return')}重設資料</button><div class="version">v19</div></div></aside><div class="shell"><header class="topbar"><button class="mobile-menu" aria-controls="primary-sidebar" aria-label="開啟選單" aria-expanded="false" data-action="menu">${icon('menu')}<span class="menu-label">選單</span></button><a href="#apply" data-action="go-home" class="mobile-brand" aria-label="海霸王・回到首頁" title="回到首頁"><img src="./assets/logo.png" alt="海霸王" width="192" height="74"></a><div class="breadcrumbs"><span id="breadcrumb-current">提出申請</span></div><div class="topbar-search">${icon('search')}<input id="quick-search" type="search" aria-label="搜尋申請" placeholder="搜尋申請編號或姓名"></div><a class="admin-login-shortcut btn text" href="#login" data-applicant-only>管理者登入</a><div class="role-switch" data-manager-only><span class="avatar" id="role-avatar">甲</span><div><label for="role-select">目前角色</label><select id="role-select">${Object.entries(availableRoles()).map(([key,name])=>`<option value="${esc(key)}">${esc(name)}</option>`).join('')}</select></div></div><button class="btn text logout-button" data-action="logout" data-manager-only>登出</button></header><main id="main" class="content" tabindex="-1"></main></div>`;
   document.getElementById('role-select').value=ui.role;
 }
 function footer(){return `<footer class="page-footer"><span>© ${new Date().getFullYear()} 海霸王・系統帳號申請</span><span class="footer-tools"><a href="./acceptance.html" target="_blank" rel="noopener">操作驗收表</a>${help('目前資料保存在此瀏覽器，角色切換不等同正式身分驗證；尚未連接寄信服務。','環境說明')}</span></footer>`;}
@@ -136,11 +136,11 @@ function render(){
   const key=[ui.view,ui.wizardStep,ui.settingsTab,ui.managerTab,ui.success,ui.lookup].join(':');
   if(key!==lastPresentationKey&&!window.matchMedia('(prefers-reduced-motion:reduce)').matches){
     const main=document.getElementById('main');main.getAnimations().forEach(animation=>animation.cancel());
-    main.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'cubic-bezier(.2,.7,.2,1)'});
+    main.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{duration:440,easing:'cubic-bezier(.2,.7,.2,1)'});
   }
   lastPresentationKey=key;
 }
-function go(view){if(!['home','overview','apply','lookup','login','workbench','settings'].includes(view))view='home';ui.view=view;ui.query='';ui.page=1;document.getElementById('quick-search').value='';if(location.hash!==`#${view}`)history.pushState(null,'',`#${view}`);closeMenu();render();window.scrollTo({top:0,behavior:'instant'});}
+function go(view){if(!['home','overview','apply','lookup','login','workbench','settings'].includes(view))view='apply';ui.view=view;ui.query='';ui.page=1;document.getElementById('quick-search').value='';if(location.hash!==`#${view}`)history.pushState(null,'',`#${view}`);closeMenu();render();window.scrollTo({top:0,behavior:'instant'});}
 
 function labelTables(){
   document.querySelectorAll('table').forEach(table=>{const headers=[...table.querySelectorAll('thead th')].map(th=>th.textContent);table.querySelectorAll('tbody tr').forEach(row=>[...row.cells].forEach((cell,i)=>{cell.dataset.label=headers[i] || '';}));});
@@ -259,7 +259,7 @@ document.addEventListener('click',event=>{
   if(event.target.closest('.skip-link')){event.preventDefault();document.getElementById('main').focus();return;}
   if(!event.target.closest('.help-wrap'))document.querySelectorAll('.help-wrap.open').forEach(w=>{w.classList.remove('open');w.querySelector('button').setAttribute('aria-expanded','false');});
   const el=event.target.closest('[data-action]');if(!el)return;const action=el.dataset.action;
-  if(action==='go-home'){go('home');}
+  if(action==='go-home'){event.preventDefault();ui.wizardStep=0;ui.success=null;go('apply');}
   else if(action==='home-requests'){go('overview');}
   else if(action==='logout'){setRole('applicant');go('home');}
   else if(action==='wizard-back'||action==='wizard-edit'){const form=document.getElementById('application-form');if(form)ui.draft=readDraft(form);ui.wizardStep=action==='wizard-back'?Math.max(0,ui.wizardStep-1):Number(el.dataset.step);render();window.scrollTo({top:0,behavior:'instant'});}
@@ -311,6 +311,6 @@ document.addEventListener('input',event=>{
 window.addEventListener('hashchange',()=>go(location.hash.slice(1)));
 window.addEventListener('popstate',()=>go(location.hash.slice(1)));
 window.addEventListener('storage',event=>{if(event.key===STORAGE_KEY){db=load();if(!document.getElementById('detail-dialog').open)render();}});
-shell();go(location.hash.slice(1)||'home');save();
+shell();go(location.hash.slice(1)||'apply');save();
 
 document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeMenu();document.querySelectorAll('.help-wrap.open').forEach(w=>{w.classList.remove('open');w.querySelector('button').setAttribute('aria-expanded','false');});if(document.activeElement?.classList.contains('help-trigger'))document.activeElement.blur();}});
