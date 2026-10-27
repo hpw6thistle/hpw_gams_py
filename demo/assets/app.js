@@ -27,7 +27,7 @@ function displayDate(value){return new Intl.DateTimeFormat('zh-TW',{timeZone:'As
 function timeText(value){return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value));}
 function badge(status){const type = {'待處理':'pending','處理中':'progress','已完成':'complete','退回補件':'returned','部分完成':'partial'}[status] || 'pending';return `<span class="badge ${type}">${esc(status)}</span>`;}
 function overall(tasks){const values=tasks.map(t=>t.status);if(values.length && values.every(v=>v==='已完成'))return '已完成';if(values.includes('退回補件'))return '退回補件';if(values.includes('已完成'))return '部分完成';if(values.includes('處理中'))return '處理中';return '待處理';}
-function initialMasters(){return {systems:Object.entries(SYSTEM_REFERENCE).map(([id,ref])=>({id,name:ref.name,code:ref.code,sourceName:ref.original,description:ref.description,roles:[...ref.roles],manager:id==='finance'?'managerA':'managerB',active:true,usesCompany:['finance','hr'].includes(id)})),units:['總部','北區','中區','南區'],companies:['範例公司 A','範例公司 B','範例公司 C']};}
+function initialMasters(){return {systems:Object.entries(SYSTEM_REFERENCE).map(([id,ref])=>({id,name:ref.name,code:ref.code,sourceName:ref.original,description:ref.description,roles:[...ref.roles],manager:id==='finance'?'managerA':'managerB',active:true,usesCompany:['finance','hr'].includes(id)})),units:Object.keys(ORGANIZATION),companies:['範例公司 A','範例公司 B','範例公司 C']};}
 function assignee(system, profile, roles = [], state = db){
   const active=id=>!state.catalog || state.catalog.people.some(p=>p.id===id&&p.active);
   if(state.catalog){
@@ -157,7 +157,7 @@ function renderOverview(){
 }
 function blankDraft(){return freshForm();}
 function textField(label,name,value,type='text',required=true,full=false,readonly=false){return inputField(label,name,value,type,required,full,readonly);}
-function unitField(label,name,value){const units=db.masters.units;return `<label class="field"><span>${label} <span class="required">*</span></span><select name="${name}" required><option value="" disabled ${units.includes(value)?'':'selected'}>請選擇</option>${units.map(u=>`<option ${value===u?'selected':''}>${esc(u)}</option>`).join('')}</select></label>`;}
+function unitField(label,name,value){return organizationField(label,name,value);}
 function draftProfile(draft){return {employee:draft.mode==='代為申請'?draft.ben_employee:draft.employee,name:draft.mode==='代為申請'?draft.ben_name:draft.name,english:draft.mode==='代為申請'?draft.ben_english:draft.english,unit:draft.mode==='代為申請'?draft.ben_unit:draft.unit,department:draft.mode==='代為申請'?draft.ben_department:draft.department};}
 function needsCompanies(draft){const p=draftProfile(draft);return draft.systems.some(id=>{const s=db.masters.systems.find(s=>s.id===id);return s?.usesCompany&&(!s.companyUnitEquals||p.unit===s.companyUnitEquals)&&(!s.companyDepartmentContains||p.department.includes(s.companyDepartmentContains));});}
 function descriptionStep(draft){return String((draft.mode==='代為申請'?5:4)+(needsCompanies(draft)?1:0)).padStart(2,'0');}
@@ -169,6 +169,7 @@ function applicationError(message){const el=document.getElementById('form-error'
 function applicantEmployee(d){return d.employee.trim();}
 function submitApplication(form){
   const d=readDraft(form);if(ui.editing){d.mode=ui.draft.mode;d.type=ui.draft.type;d.employee=findRequest(ui.editing).applicant.employee;d.systems=findRequest(ui.editing).tasks.map(t=>t.systemId);}
+  const validation=applicationValidation(d);if(validation)return applicationError(validation);
   ui.draft=d;const fields=['employee','name','english','unit','department'];
   if(fields.filter(k=>k!=='english').some(k=>!d[k]?.trim()) || (d.mode==='代為申請'&&['ben_employee','ben_name','ben_unit','ben_department','reason'].some(k=>!d[k]?.trim())))return applicationError('請填寫所有必填的人員資料。');
   if(d.type==='已有帳號新增功能'&&!d.existing.trim())return applicationError('請填寫權限使用人的員工編號。');

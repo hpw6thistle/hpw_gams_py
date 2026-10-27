@@ -274,3 +274,4 @@ td strong,.stat-number,.detail-grid dd { color:#51483b; }
   .wizard-actions { padding-top:20px; }
   .system-card { padding-block:20px; }
 }
+.org-field{position:relative;min-width:0}.org-field input[aria-expanded=true]{border-color:var(--accent)}.org-options{position:absolute;top:92px;left:0;right:0;z-index:80;max-height:240px;overflow:auto;background:#fffefa;border:1px solid #d9d0c4;border-radius:4px;box-shadow:0 6px 20px #30252a12;padding:5px}.org-options button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#574b43;padding:10px 12px;font-size:17px;min-height:44px;cursor:pointer}.org-options button:hover,.org-options button[aria-selected=true]{background:#f0e8e4;color:var(--accent)}.org-empty{display:block;padding:12px;font-size:15px;color:#777}.org-field .field-meta{font-size:13px}

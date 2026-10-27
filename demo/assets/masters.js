@@ -10,6 +10,7 @@ function upgradeDemo(state){
     for(const key of ['units','companies'])state.catalog[key]=state.masters[key].map((name,i)=>({id:key+'-'+i,name,active:true,sort:(i+1)*10}));
   }
   state.masters.systems.forEach((s,i)=>{s.sort??=(i+1)*10;s.companyUnitEquals??='總部';s.companyDepartmentContains??='財務';});
+  importOrganization(state);
   alignOriginalSystems(state);
   syncDemoMasters(state);
   return state;
