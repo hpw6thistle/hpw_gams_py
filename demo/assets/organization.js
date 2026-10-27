@@ -191,31 +191,41 @@ function importOrganization(state){
  for(const unit of Object.keys(ORGANIZATION))if(!state.catalog.units.some(r=>r.name===unit))state.catalog.units.push({id:'org-unit-'+unit,name:unit,active:true,sort:100+state.catalog.units.length});
  state.catalog.organizationRevision=1;
 }
+function activeOrgUnits(){return Object.keys(ORGANIZATION).filter(u=>db.catalog.units.some(r=>r.name===u&&r.active));}
+function departmentUnits(value){return activeOrgUnits().filter(u=>ORGANIZATION[u].includes(value));}
 function orgOptions(name,form){
- if(name==='unit'||name==='ben_unit')return Object.keys(ORGANIZATION).filter(u=>db.catalog.units.some(r=>r.name===u&&r.active));
- const unit=form?.elements.namedItem(name==='department'?'unit':'ben_unit')?.value||'';
- return ORGANIZATION[unit]||[];
+ if(name==='unit'||name==='ben_unit')return activeOrgUnits();
+ return [...new Set(activeOrgUnits().flatMap(u=>ORGANIZATION[u]))];
 }
-function organizationField(label,name,value){return `<label class="field org-field"><span>${esc(label)} <span class="required">*</span></span><input name="${name}" value="${esc(value)}" placeholder="${name.includes('department')?'先選單位，再搜尋部門':'輸入或搜尋大部門代號'}" maxlength="60" required aria-label="${esc(label)}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="options-${name}" autocomplete="off"><span class="org-options" role="listbox" aria-label="${esc(label)}選項" id="options-${name}" hidden></span><span class="field-meta">可輸入關鍵字搜尋，請從清單選取。</span></label>`;}
+function syncDepartmentUnit(input,chosenUnit=''){
+ const units=departmentUnits(input.value);if(!units.length)return;
+ const field=input.form.elements.namedItem(input.name==='department'?'unit':'ben_unit');
+ field.value=units.includes(chosenUnit)?chosenUnit:units.length===1?units[0]:units.includes(field.value)?field.value:'';
+}
+function organizationField(label,name,value){return `<label class="field org-field"><span>${esc(label)} <span class="required">*</span></span><input name="${name}" value="${esc(value)}" placeholder="${name.includes('department')?'請輸入或搜尋部門':'請輸入或搜尋單位'}" maxlength="60" required aria-label="${esc(label)}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="options-${name}" autocomplete="off"><span class="org-options" role="listbox" aria-label="${esc(label)}選項" id="options-${name}" hidden></span><span class="field-meta">${name.includes('department')?'選擇部門會自動帶入單位。':'可輸入關鍵字搜尋，請從清單選取。'}</span></label>`;}
 function showOrgOptions(input){
  const list=document.getElementById('options-'+input.name);if(!list)return;
  const matches=orgOptions(input.name,input.form).filter(v=>v.toLocaleLowerCase().includes(input.value.trim().toLocaleLowerCase()));
  list.replaceChildren();
- for(const value of matches){const option=document.createElement('button');option.type='button';option.role='option';option.textContent=value;option.dataset.orgValue=value;option.dataset.orgName=input.name;option.tabIndex=-1;list.append(option);}
- if(!matches.length){const empty=document.createElement('span');empty.className='org-empty';empty.textContent=input.name.includes('department')?'請先選擇有效單位，或更換搜尋文字。':'沒有符合的選項。';list.append(empty);}
+ for(const value of matches){
+  const units=input.name.includes('department')?departmentUnits(value):[''];
+  for(const unit of units){const option=document.createElement('button');option.type='button';option.role='option';option.textContent=value+(units.length>1?'（單位 '+unit+'）':'');option.dataset.orgValue=value;option.dataset.orgName=input.name;option.dataset.orgUnit=unit;option.tabIndex=-1;list.append(option);}
+ }
+ if(!matches.length){const empty=document.createElement('span');empty.className='org-empty';empty.textContent=input.name.includes('department')?'沒有符合的部門，請更換搜尋文字。':'沒有符合的選項。';list.append(empty);}
  list.hidden=false;input.setAttribute('aria-expanded','true');input.removeAttribute('aria-activedescendant');
 }
 function closeOrgOptions(){document.querySelectorAll('.org-options').forEach(e=>e.hidden=true);document.querySelectorAll('.org-field input').forEach(e=>{e.setAttribute('aria-expanded','false');e.removeAttribute('aria-activedescendant');});}
-function pickOrg(input,value){
+function pickOrg(input,value,chosenUnit=''){
  if(!orgOptions(input.name,input.form).includes(value))return;
  input.value=value;
+ if(input.name.includes('department'))syncDepartmentUnit(input,chosenUnit);
  if(input.name==='unit'||input.name==='ben_unit'){const dept=input.form.elements.namedItem(input.name==='unit'?'department':'ben_department');dept.value='';}
  input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));closeOrgOptions();input.focus();closeOrgOptions();
 }
 document.addEventListener('focusin',e=>{if(e.target.matches('.org-field input'))showOrgOptions(e.target);else if(!e.target.closest('.org-field'))closeOrgOptions();});
-document.addEventListener('input',e=>{if(e.target.matches('.org-field input')){if(['unit','ben_unit'].includes(e.target.name)){const dept=e.target.form.elements.namedItem(e.target.name==='unit'?'department':'ben_department');dept.value='';}showOrgOptions(e.target);}});
+document.addEventListener('input',e=>{if(e.target.matches('.org-field input')){if(['unit','ben_unit'].includes(e.target.name)){const dept=e.target.form.elements.namedItem(e.target.name==='unit'?'department':'ben_department');dept.value='';}else syncDepartmentUnit(e.target);showOrgOptions(e.target);}});
 document.addEventListener('mousedown',e=>{if(e.target.closest('[data-org-value]'))e.preventDefault();});
-document.addEventListener('click',e=>{const option=e.target.closest('[data-org-value]');if(option){const input=document.querySelector('.org-field input[name="'+option.dataset.orgName+'"]');pickOrg(input,option.dataset.orgValue);}else if(e.target.matches('.org-field input'))showOrgOptions(e.target);else if(!e.target.closest('.org-field'))closeOrgOptions();});
+document.addEventListener('click',e=>{const option=e.target.closest('[data-org-value]');if(option){const input=document.querySelector('.org-field input[name="'+option.dataset.orgName+'"]');pickOrg(input,option.dataset.orgValue,option.dataset.orgUnit);}else if(e.target.matches('.org-field input'))showOrgOptions(e.target);else if(!e.target.closest('.org-field'))closeOrgOptions();});
 document.addEventListener('keydown',e=>{
  const input=e.target;if(!input.matches('.org-field input'))return;
  if(e.key==='Escape'||e.key==='Tab'){closeOrgOptions();return;}
@@ -224,7 +234,7 @@ document.addEventListener('keydown',e=>{
  e.preventDefault();if(list.hidden)showOrgOptions(input);
  const options=[...list.querySelectorAll('button')];if(!options.length)return;
  let i=options.findIndex(o=>o.getAttribute('aria-selected')==='true');
- if(e.key==='Enter'){if(i>=0||options.length===1)pickOrg(input,options[Math.max(0,i)].dataset.orgValue);return;}
+ if(e.key==='Enter'){if(i>=0||options.length===1)pickOrg(input,options[Math.max(0,i)].dataset.orgValue,options[Math.max(0,i)].dataset.orgUnit);return;}
  i=i<0?(e.key==='ArrowDown'?0:options.length-1):(i+(e.key==='ArrowDown'?1:-1)+options.length)%options.length;
  options.forEach((o,n)=>{o.id='org-'+input.name+'-'+n;o.setAttribute('aria-selected',String(n===i));});input.setAttribute('aria-activedescendant',options[i].id);options[i].scrollIntoView({block:'nearest'});
 });
